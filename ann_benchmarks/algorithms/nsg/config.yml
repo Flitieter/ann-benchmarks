@@ -1,0 +1,21 @@
+float:
+  any:
+  - base_args: ['@metric']
+    constructor: nsg
+    disabled: false
+    docker_tag: ann-benchmarks-nsg
+    module: ann_benchmarks.algorithms.nsg
+    name: nsg
+    run_groups:
+      nsg:
+        args: 
+          KNN_K: [200]
+          KNN_L: [200]
+          KNN_iter: [10]
+          KNN_S: [10]
+          KNN_R: [100]
+          NSG_L: [40]
+          NSG_R: [50]
+          NSG_C: [500]
+          SEARCH_L: [50]
+          # SEARCH_K: [10]
