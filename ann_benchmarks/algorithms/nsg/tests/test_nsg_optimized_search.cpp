@@ -41,10 +41,57 @@ void save_result(const char* filename,
   }
   out.close();
 }
+
+
+void load_ivecs_data(const char* filename,
+                 std::vector<std::vector<unsigned> >& results, unsigned &num, unsigned &dim) {
+  std::ifstream in(filename, std::ios::binary);
+  if (!in.is_open()) {
+    std::cout << "ivecs open file error" << std::endl;
+    exit(-1);
+  }
+  in.read((char*)&dim, 4);
+  //std::cout<<"data dimension: "<<dim<<std::endl;
+  in.seekg(0, std::ios::end);
+  std::ios::pos_type ss = in.tellg();
+  size_t fsize = (size_t)ss;
+  num = (unsigned)(fsize / (dim + 1) / 4);
+  results.resize(num);
+  for (unsigned i = 0; i < num; i++) results[i].resize(dim);
+
+  in.seekg(0, std::ios::beg);
+  for (size_t i = 0; i < num; i++) {
+    in.seekg(4, std::ios::cur);
+    in.read((char*)results[i].data(), dim * 4);
+  }
+  in.close();
+}
+
+void eval_recall(std::vector<std::vector<unsigned> >& query_set, std::vector<std::vector<unsigned> > &acc_eval_set){
+  float mean_acc=0;
+
+  for(unsigned i=0; i<query_set.size(); i++){
+    float acc = 0;
+    auto &g = query_set[i];
+    auto &v = acc_eval_set[i];
+    int top_k = g.size();
+    for(unsigned j = 0; j < top_k; j ++){
+      for(unsigned k = 0; k < top_k; k++){
+        if(g[j] == v[k]){
+          acc++;
+          break;
+        }
+      }
+    }
+    mean_acc += acc / top_k;
+  }
+  std::cout<<"recall : "<<mean_acc / query_set.size() <<std::endl;
+}
+
 int main(int argc, char** argv) {
-  if (argc != 7) {
+  if (argc != 8) {
     std::cout << argv[0]
-              << " data_file query_file nsg_path search_L search_K result_path"
+              << " data_file query_file nsg_path search_L search_K result_path grouth_file"
               << std::endl;
     exit(-1);
   }
@@ -79,6 +126,7 @@ int main(int argc, char** argv) {
   for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
   auto s = std::chrono::high_resolution_clock::now();
+  #pragma omp parallel for
   for (unsigned i = 0; i < query_num; i++) {
     index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
   }
@@ -86,6 +134,14 @@ int main(int argc, char** argv) {
   std::chrono::duration<double> diff = e - s;
   std::cout << "search time: " << diff.count() << "\n";
 
+
+  std::vector<std::vector<unsigned> > true_load;
+  unsigned G_dim, G_num;
+  load_ivecs_data(argv[7], true_load, G_num, G_dim);  
+  
+  eval_recall(res , true_load);
+
+  std::cout<<"qps: "<< query_num * 1.0 / diff.count()<<"\n";
   save_result(argv[6], res);
 
   return 0;
