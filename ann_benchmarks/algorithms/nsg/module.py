@@ -57,9 +57,9 @@ class Nsg(BaseANN):
 
         print('fit done')
 
-    def set_query_arguments(self,search_k, search_l):
-        self.SEARCH_L = int(search_l * search_k)
-        self._search_k = search_k
+    def set_query_arguments(self,search_L ):
+        self.SEARCH_L = search_L
+   
     def query(self, v: numpy.array, n: int):
         X_flat = v.flatten()
         X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))

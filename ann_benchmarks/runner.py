@@ -206,7 +206,6 @@ def run(definition: Definition, dataset_name: str, count: int, run_count: int, b
         batch (bool): If true, runs in batch mode.
     """
     algo = instantiate_algorithm(definition)
-    print(definition.query_argument_groups)
     assert not definition.query_argument_groups or hasattr(
         algo, "set_query_arguments"
     ), f"""\
