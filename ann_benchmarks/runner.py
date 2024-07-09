@@ -68,6 +68,7 @@ def run_individual_query(algo: BaseANN, X_train: numpy.array, X_test: numpy.arra
                 total = time.time() - start
 
             # make sure all returned indices are unique
+   
             assert len(candidates) == len(set(candidates)), "Implementation returned duplicated candidates"
 
             candidates = [
@@ -205,6 +206,7 @@ def run(definition: Definition, dataset_name: str, count: int, run_count: int, b
         batch (bool): If true, runs in batch mode.
     """
     algo = instantiate_algorithm(definition)
+    print(definition.query_argument_groups)
     assert not definition.query_argument_groups or hasattr(
         algo, "set_query_arguments"
     ), f"""\

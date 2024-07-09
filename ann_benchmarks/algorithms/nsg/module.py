@@ -23,6 +23,9 @@ c_query = c_module.query
 c_query.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int,ctypes.POINTER(ctypes.c_uint32)]
 c_query.restype = ctypes.c_void_p
 
+c_batch_query = c_module.batch_query
+c_batch_query.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int,ctypes.POINTER(ctypes.c_uint32)]
+c_batch_query.restype = ctypes.c_void_p
 
 class Nsg(BaseANN):
     def __init__(self, metric ,method_param):
@@ -35,8 +38,7 @@ class Nsg(BaseANN):
         self.NSG_R = method_param["NSG_R"]
         self.NSG_C = method_param["NSG_C"]
 
-        self.SEARCH_L = method_param["SEARCH_L"]
-        # self.SEARCH_K = method_param["SEARCH_K"]
+        # self.SEARCH_L = method_param["SEARCH_L"]
 
         self._metric = metric
         
@@ -54,43 +56,34 @@ class Nsg(BaseANN):
         c_fit(X_ctypes, rows, cols)
 
         print('fit done')
-    
+
+    def set_query_arguments(self,search_k, search_l):
+        self.SEARCH_L = int(search_l * search_k)
+        self._search_k = search_k
     def query(self, v: numpy.array, n: int):
         X_flat = v.flatten()
         X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-        A_ctypes = (ctypes.c_uint32 * ( len(X_flat)* n))()
+        A_ctypes = (ctypes.c_uint32 * (n))()
 
         c_query(X_ctypes, self.SEARCH_L, n , A_ctypes)
-        # raise NotImplementedError
+        return A_ctypes
+        
 
-    # def batch_query(self, X: numpy.array, n: int) -> None:
-    #     print('batch_query starts')
-    #     print(X)
-    #     rows, cols = X.shape
-    #     X_flat = X.flatten()
-    #     X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    #     A_ctypes = (ctypes.c_uint32 * (rows * n))()
+    def batch_query(self, X: numpy.array, n: int) -> None:
+        print('batch_query starts')
+        print(X)
+        rows, cols = X.shape
+        X_flat = X.flatten()
+        X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        A_ctypes = (ctypes.c_uint32 * (rows * n))()
 
-    #     c_batch_query(X_ctypes, rows, cols, n, A_ctypes)
+        c_batch_query(X_ctypes,  self.SEARCH_L, n, A_ctypes , rows)
 
-    #     self.res = numpy.frombuffer(A_ctypes, dtype=numpy.uint32)
+        self.res = numpy.frombuffer(A_ctypes, dtype=numpy.uint32)
 
-    #     print('batch_query done')
-    #     print(self.res)
+        print('batch_query done')
+        print(self.res)
 
-
-# def main():
-#     dataset = numpy.array([[i, i] for i in range(20)], dtype=numpy.float32)
-#     algo = Nsg(0)
-#     algo.fit(dataset)
-#     queries = numpy.array([[i + 0.4, i + 0.4] for i in range(5)], dtype=numpy.float32)
-#     algo.batch_query(queries, 2)
-#     ans = numpy.array([[i, i + 1] for i in range(5)], dtype=numpy.uint32)
-#     assert ans == algo.res
-    
-
-# if __name__ == '__main__':
-#     main()
 
         
 

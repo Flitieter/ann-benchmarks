@@ -92,6 +92,17 @@ void query(float* query_data , unsigned l , unsigned k , unsigned* result){
     // std::vector<unsigned> tmp(k);
     nsg_index->Search(query_data, data, k, paras, result);  
 }
+
+void batch_query(float* query_data , unsigned l , unsigned k , unsigned* result , unsigned query_num){
+    efanna2e::Parameters paras;
+    paras.Set<unsigned>("L_search", l);
+    paras.Set<unsigned>("P_search", l);
+   
+    #pragma omp parallel for
+    for(int i = 0 ; i < query_num ; i++){
+        nsg_index->Search(query_data + dim * i, data, k, paras, result + k * dim * i);
+    }
+}
 }
 
 int main()
