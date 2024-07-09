@@ -4,7 +4,7 @@ import numpy
 import ctypes
 
 
-c_module = ctypes.CDLL('ann_benchmarks/algorithms/nsg/libhybrid_search.so')
+c_module = ctypes.CDLL('ann_benchmarks/algorithms/nsg/nsg.so')
 
 c_knn_init = c_module.init_KNN_parameters
 c_knn_init.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
@@ -25,7 +25,7 @@ c_query.restype = ctypes.c_void_p
 
 
 class Nsg(BaseANN):
-    def __init__(self, metric,dim ,method_param):
+    def __init__(self, metric ,method_param):
         self.KNN_K = method_param["KNN_K"]
         self.KNN_L = method_param["KNN_L"]
         self.KNN_iter = method_param["KNN_iter"]
@@ -39,8 +39,8 @@ class Nsg(BaseANN):
         # self.SEARCH_K = method_param["SEARCH_K"]
 
         self._metric = metric
-        self.name = "Alaya(test_param=%d)" % self._test_param
-
+        
+        self.name = 'Nsg(%s)' % (method_param)
         c_knn_init(self.KNN_K, self.KNN_L, self.KNN_iter, self.KNN_S, self.KNN_R)
         c_nsg_init(self.NSG_L, self.NSG_R, self.NSG_C)
 
@@ -58,10 +58,10 @@ class Nsg(BaseANN):
     def query(self, v: numpy.array, n: int):
         X_flat = v.flatten()
         X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-        A_ctypes = (ctypes.c_uint32 * (rows * n))()
+        A_ctypes = (ctypes.c_uint32 * ( len(X_flat)* n))()
 
         c_query(X_ctypes, self.SEARCH_L, n , A_ctypes)
-        raise NotImplementedError
+        # raise NotImplementedError
 
     # def batch_query(self, X: numpy.array, n: int) -> None:
     #     print('batch_query starts')

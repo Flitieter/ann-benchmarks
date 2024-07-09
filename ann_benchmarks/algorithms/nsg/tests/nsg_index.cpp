@@ -36,13 +36,34 @@ std::string get_graph_file(char* filename , std::string file_suffix){
     return save_nndescent_graph_file_name;
 }
 
-void build_nndescent()
-{
+void load_ivecs_data(const char* filename,
+                 std::vector<std::vector<unsigned> >& results, unsigned &num, unsigned &dim) {
+  std::ifstream in(filename, std::ios::binary);
+  if (!in.is_open()) {
+    std::cout << "open file error" << std::endl;
+    exit(-1);
+  }
+  in.read((char*)&dim, 4);
+  //std::cout<<"data dimension: "<<dim<<std::endl;
+  in.seekg(0, std::ios::end);
+  std::ios::pos_type ss = in.tellg();
+  size_t fsize = (size_t)ss;
+  num = (unsigned)(fsize / (dim + 1) / 4);
+  results.resize(num);
+  for (unsigned i = 0; i < num; i++) results[i].resize(dim);
 
+  in.seekg(0, std::ios::beg);
+  for (size_t i = 0; i < num; i++) {
+    in.seekg(4, std::ios::cur);
+    in.read((char*)results[i].data(), dim * 4);
+  }
+  in.close();
 }
 
 int main(int argc , char** argv){
-  if(argc != 8){std::cout<< argv[0] <<" data_file  K L iter S R C"<<std::endl; exit(-1);}
+
+
+  if(argc != 8){std::cout<< argv[0] <<" data_file K L iter S R C"<<std::endl; exit(-1);}
   float* data_load = NULL;
   unsigned points_num, dim;
   load_data(argv[1], data_load, points_num, dim);
@@ -93,5 +114,7 @@ int main(int argc , char** argv){
   nsg_index.Save(index_result_filename.c_str());   
    
 
-   std::cout<<"nsg index has save to "<<index_result_filename<<std::endl;
+  std::cout<<"nsg index has save to "<<index_result_filename<<std::endl;
+
+  
 }

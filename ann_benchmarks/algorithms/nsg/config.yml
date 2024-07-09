@@ -1,7 +1,7 @@
 float:
   any:
   - base_args: ['@metric']
-    constructor: nsg
+    constructor: Nsg
     disabled: false
     docker_tag: ann-benchmarks-nsg
     module: ann_benchmarks.algorithms.nsg

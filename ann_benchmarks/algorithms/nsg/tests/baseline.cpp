@@ -8,7 +8,6 @@
 #include <string>
 
 const char* SAVE_KNN_GRAPH_FILANAME = "save_knn_graph.graph";
-
 unsigned KNN_K; //is the 'K' of kNN graph.
 unsigned KNN_L; //is the parameter controlling the graph quality, larger is more accurate but slower, no smaller than K.
 unsigned KNN_iter; //is the parameter controlling the iteration times, iter usually < 30.
@@ -22,6 +21,8 @@ unsigned SEARCH_K; //controls the number of result neighbors we want to query.
 std::unique_ptr<efanna2e::IndexNSG> nsg_index = nullptr;
 unsigned points_num, dim;
 float* data = NULL;
+
+extern "C" {
 
 void init_KNN_parameters(unsigned k , unsigned l , unsigned iter , unsigned s , unsigned r)
 {
@@ -91,7 +92,7 @@ void query(float* query_data , unsigned l , unsigned k , unsigned* result){
     // std::vector<unsigned> tmp(k);
     nsg_index->Search(query_data, data, k, paras, result);  
 }
-
+}
 
 int main()
 {

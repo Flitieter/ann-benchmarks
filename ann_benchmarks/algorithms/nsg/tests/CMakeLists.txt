@@ -19,6 +19,9 @@ target_link_libraries(test_nndescent_refine ${PROJECT_NAME})
 add_executable(nsg_index nsg_index.cpp)
 target_link_libraries(nsg_index ${PROJECT_NAME})
 
+
+add_executable(grouth_test grouth_test.cpp)
+target_link_libraries(grouth_test ${PROJECT_NAME})
 # add_executable(baseline baseline.cpp)
 # target_link_libraries(baseline ${PROJECT_NAME})
 
