@@ -68,6 +68,7 @@ def run_individual_query(algo: BaseANN, X_train: numpy.array, X_test: numpy.arra
                 total = time.time() - start
 
             # make sure all returned indices are unique
+   
             assert len(candidates) == len(set(candidates)), "Implementation returned duplicated candidates"
 
             candidates = [

@@ -1,6 +1,7 @@
 .DS_Store
 *.pyc
 *.o
+*.graph
 protocol/c/fr-*
 
 install/*.txt
