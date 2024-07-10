@@ -17,7 +17,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 SET(CMAKE_CXX_FLAGS  "-Wextra -O3 -lrt -std=c++17 -march=native -fPIC -fopenmp -ftree-vectorize -fno-exceptions -fno-rtti" )
 
 add_executable(main main/main.cpp)
-target_link_libraries(main glass fmt::fmt)
+#target_link_libraries(main glass fmt::fmt)
 
 # add_executable(main examples/main.cc)
 # target_link_libraries(main glass)

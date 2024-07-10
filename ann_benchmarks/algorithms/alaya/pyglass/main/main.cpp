@@ -1,5 +1,3 @@
-#include <fmt/chrono.h>
-#include <fmt/core.h>
 
 #include <glass/graph.hpp>
 #include <glass/hnsw/hnsw.hpp>
@@ -13,7 +11,7 @@
 
 int main(int argc, char **argv) {
   if (argc != 7) {
-    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
+//    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
     exit(-1);
   }
 
@@ -81,7 +79,7 @@ int main(int argc, char **argv) {
   }
   timer.end();
   // std::cout << "Time: " << timer.getElapsedTime() << std::endl;
-  fmt::println("Search Time: {}", timer.getElapsedTime());
+//  fmt::println("Search Time: {}", timer.getElapsedTime());
 
   // for (int i = 0; i < 10; ++i) {
   //   printf("search res: \n");
@@ -109,7 +107,7 @@ int main(int argc, char **argv) {
 
   float recall = glass::CalRecallById(res_pool, topk, answers, kk);
 
-  fmt::println("Recall: {}", recall);
+//  fmt::println("Recall: {}", recall);
 
   return 0;
 }
