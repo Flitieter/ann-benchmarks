@@ -18,3 +18,9 @@ results/*
 venv
 
 .idea
+
+build
+
+.vscode
+
+.github
