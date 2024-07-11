@@ -571,6 +571,7 @@ def dbpedia_entities_openai_1M(out_fn, n = None):
 
 
 DATASETS: Dict[str, Callable[[str], None]] = {
+    "cohere-768-euclidean": None,
     "deep-image-96-angular": deep_image,
     "fashion-mnist-784-euclidean": fashion_mnist,
     "gist-960-euclidean": gist,

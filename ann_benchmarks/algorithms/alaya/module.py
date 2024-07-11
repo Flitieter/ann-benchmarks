@@ -83,7 +83,7 @@ class BaseANN(object):
 import ctypes
 import numpy
 
-c_module = ctypes.CDLL('/home/ann-benchmark/yitao/ann-bench/ann-benchmarks/ann_benchmarks/algorithms/alaya/pyglass/cmake-build-debug/libAlayaDB.so')
+c_module = ctypes.CDLL('ann_benchmarks/algorithms/alaya/alaya.so')
 
 c_fit = c_module.fit
 c_fit.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int]
@@ -107,7 +107,10 @@ class Alaya(BaseANN):
     def fit(self, X: numpy.array):
         print('fit starts')
         rows, cols = X.shape
+
         X_flat = X.flatten()
+
+
         X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
         # self.data  = X_ctypes
 

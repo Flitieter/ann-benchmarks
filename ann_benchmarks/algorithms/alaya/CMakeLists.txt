@@ -8,12 +8,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
-FetchContent_Declare(
-    fmt
-    URL https://github.com/fmtlib/fmt/releases/download/10.2.1/fmt-10.2.1.zip
-    DOWNLOAD_EXTRACT_TIMESTAMP true
-)
-FetchContent_MakeAvailable(fmt)
+# FetchContent_Declare(
+#     fmt
+#     URL https://github.com/fmtlib/fmt/releases/download/10.2.1/fmt-10.2.1.zip
+#     DOWNLOAD_EXTRACT_TIMESTAMP true
+# )
+# FetchContent_MakeAvailable(fmt)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -march=native -pthread -g -Wall -pthread -mavx2 -mfma")
