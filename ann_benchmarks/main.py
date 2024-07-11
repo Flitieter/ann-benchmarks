@@ -308,6 +308,8 @@ def main():
         shutil.rmtree(INDEX_DIR)
 
     dataset, dimension = get_dataset(args.dataset)
+    print("dataset", dataset)
+    print("dimension", dimension)
     definitions: List[Definition] = get_definitions(
         dimension=dimension,
         point_type=dataset.attrs.get("point_type", "float"),
@@ -339,6 +341,7 @@ def main():
     definitions = limit_algorithms(definitions, args.max_n_algorithms)
 
     if len(definitions) == 0:
+        print("definitions", definitions)
         raise Exception("Nothing to run")
     else:
         logger.info(f"Order: {definitions}")

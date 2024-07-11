@@ -22,6 +22,8 @@ class Milvus(BaseANN):
         max_trys = 10
         for try_num in range(max_trys):
             try:
+                http_p = os.getenv('http_proxy')
+                print("http_proxy: ", http_p)
                 self.connects.connect("default", host='localhost', port='19530')
                 break
             except Exception as e:
