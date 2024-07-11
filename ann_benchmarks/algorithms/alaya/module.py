@@ -138,7 +138,7 @@ class Alaya(BaseANN):
         # print(self.res)
 
 def main():
-    random.seed(time.time());
+    random.seed(time.time())
     dataset = numpy.array([numpy.random.rand(100) * 10 for i in range(100000)], dtype=numpy.float32)
     algo = Alaya(0)
     algo.fit(dataset)
