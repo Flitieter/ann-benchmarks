@@ -24,7 +24,7 @@ class Alaya(BaseANN):
         self.ef = 32
         self.rerank = 20
 
-    def fit(self, X: np.ndarray):
+    def fit(self, X: np.array):
         print('fit starts')
         rows, cols = X.shape
 
@@ -37,7 +37,7 @@ class Alaya(BaseANN):
 
         print('fit done')
     
-    def query(self, v: np.ndarray, n: int):
+    def query(self, v: np.array, n: int):
         rows, cols = v.shape
         X_flat = v.flatten()
         X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
@@ -46,27 +46,28 @@ class Alaya(BaseANN):
         # print('python c_batch')
         c_batch_query(X_ctypes, rows, cols, n, self.ef, self.rerank, A_ctypes)
 
-        self.res = np.frombuffer(A_ctypes, dtype=np.uint32).reshape(rows, n)
+        # self.res = np.frombuffer(A_ctypes, dtype=np.uint32).reshape(rows, n)
+        return np.frombuffer(A_ctypes, dtype=np.uint32).reshape(rows, n)
         # raise NotImplementedError
 
     def set_query_arguments(self, ef:int):
         self.ef, self.rerank = ef
 
-    # def batch_query(self, X: numpy.array, n: int) -> None:
-    #     # print('batch_query starts')
-    #     # print(X)
-    #     rows, cols = X.shape
-    #     X_flat = X.flatten()
-    #     X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    #     A_ctypes = (ctypes.c_uint32 * (rows * n))()
+    def batch_query(self, X: np.array, n: int) -> None:
+        # print('batch_query starts')
+        # print(X)
+        rows, cols = X.shape
+        X_flat = X.flatten()
+        X_ctypes = X_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        A_ctypes = (ctypes.c_uint32 * (rows * n))()
 
-    #     # print('python c_batch')
-    #     c_batch_query(X_ctypes, rows, cols, n, self.ef, self.rerank, A_ctypes)
+        # print('python c_batch')
+        c_batch_query(X_ctypes, rows, cols, n, self.ef, self.rerank, A_ctypes)
 
-    #     self.res = numpy.frombuffer(A_ctypes, dtype=numpy.uint32).reshape(rows, n)
+        self.res = np.frombuffer(A_ctypes, dtype=np.uint32).reshape(rows, n)
 
-    #     # print('batch_query done')
-    #     # print(self.res)
+        # print('batch_query done')
+        # print(self.res)
 
 def main():
     import random
@@ -84,7 +85,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-        
-
 
