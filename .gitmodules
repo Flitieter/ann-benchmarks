@@ -1,0 +1,4 @@
+[submodule "ann_benchmarks/algorithms/alaya/pybind11"]
+	path = ann_benchmarks/algorithms/alaya/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
