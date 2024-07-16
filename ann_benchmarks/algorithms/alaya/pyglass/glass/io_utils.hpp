@@ -1,10 +1,11 @@
 #pragma once
 
+#include <fmt/core.h>
+
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
-//#include <fmt/core.h>
 #include <vector>
 
 namespace glass {
@@ -23,8 +24,8 @@ inline void load_fvecs(char *filename, float *&data, unsigned &num,
   num = (unsigned)(fsize / (dim + 1) / 4);
   data = new float[num * dim * sizeof(float)];
 
-//  fmt::println("Read {}", filename);
-//  fmt::println("data number: {}, data dimension: {}", num, dim);
+  fmt::println("Read {}", filename);
+  fmt::println("data number: {}, data dimension: {}", num, dim);
 
   in.seekg(0, std::ios::beg);
   for (size_t i = 0; i < num; i++) {
@@ -47,8 +48,8 @@ inline void load_ivecs(char *filename, unsigned *&data, unsigned &num,
   size_t fsize = (size_t)ss;
   num = (unsigned)(fsize / (dim + 1) / 4);
 
-//  fmt::println("Read {}", filename);
-//  fmt::println("data number: {}, data dimension: {}", num, dim);
+  //  fmt::println("Read {}", filename);
+  //  fmt::println("data number: {}, data dimension: {}", num, dim);
 
   data = new unsigned[num * dim * sizeof(int)];
 
@@ -61,8 +62,8 @@ inline void load_ivecs(char *filename, unsigned *&data, unsigned &num,
 }
 
 template <typename IDType = uint32_t>
-float CalRecallById(const IDType* kResVal, const uint32_t kNum, const uint32_t kK,
-                    const IDType* kGtVal, const uint32_t kGtLine) {
+float CalRecallById(const IDType *kResVal, const uint32_t kNum, const uint32_t kK, const IDType *kGtVal,
+                    const uint32_t kGtLine) {
   float exact_num = 0;
   for (auto n = 0; n < kNum; ++n) {
     std::vector<bool> visted(kK, false);

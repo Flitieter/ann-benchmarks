@@ -47,7 +47,7 @@ add_subdirectory(pyglass)
 # find_package(pybind11 REQUIRED)
 
 add_library(AlayaDB SHARED bind.cpp)
-target_link_libraries(AlayaDB glass pybind11::pybind11)
+target_link_libraries(AlayaDB glass)
 
 pybind11_add_module(alaya pybinding.cpp)
 target_link_libraries(alaya PRIVATE glass OpenMP::OpenMP_CXX)

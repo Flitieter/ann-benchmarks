@@ -1,0 +1,7 @@
+alaya.cpython-38-x86_64-linux-gnu.so
+setup.py
+alaya.egg-info/PKG-INFO
+alaya.egg-info/SOURCES.txt
+alaya.egg-info/dependency_links.txt
+alaya.egg-info/not-zip-safe
+alaya.egg-info/top_level.txt

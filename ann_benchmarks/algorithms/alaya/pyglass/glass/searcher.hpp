@@ -3,13 +3,13 @@
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <random>
 #include <string>
 #include <thread>
 #include <type_traits>
 #include <vector>
-#include <iostream>
 
 #include "glass/common.hpp"
 #include "glass/graph.hpp"
@@ -22,7 +22,7 @@ namespace glass {
 struct SearcherBase {
   virtual void SetData(const float *data, int n, int dim) = 0;
   virtual void Optimize(int num_threads = 0) = 0;
-  virtual void Search(const float *q, int k, int *dst) const = 0;
+  virtual void Search(const float *q, int k, int *dst, bool debug = false) const = 0;
   virtual void SetEf(int ef) = 0;
   virtual ~SearcherBase() = default;
 };
@@ -78,7 +78,7 @@ struct Searcher : public SearcherBase {
     std::vector<int> try_pls(std::min(kTryPls, (int)upper_div(quant.code_size, 64)));
     std::iota(try_pos.begin(), try_pos.end(), 1);
     std::iota(try_pls.begin(), try_pls.end(), 1);
-    std::vector<int> dummy_dst(kTryK);
+    std::vector<int> dummy_dst(ef);
     printf("=============Start optimization=============\n");
     {  // warmup
 #pragma omp parallel for schedule(dynamic) num_threads(num_threads)
@@ -126,12 +126,21 @@ struct Searcher : public SearcherBase {
     this->pl = best_pl;
   }
 
-  void Search(const float *q, int k, int *dst) const override {
+  void Search(const float *q, int k, int *dst, bool debug = false) const override {
     auto computer = quant.get_computer(q);
-    searcher::LinearPool<typename Quantizer::template Computer<0>::dist_type> pool(nb, std::max(k, ef), k);
+    if (!debug) {
+      assert(k == 10);
+      assert(ef == 32);
+    }
+    searcher::LinearPool<typename Quantizer::template Computer<0>::dist_type> pool(nb, ef, k);
     graph.initialize_search(pool, computer);
     SearchImpl(pool, computer);
-    quant.reorder(pool, q, dst, k);
+    if (debug) {
+      for (int i = 0; i < ef; ++i) {
+        printf("pool[%d] %d\n", i, pool.id(i));
+      }
+    }
+    quant.reorder(pool, q, dst, ef, debug);
   }
 
   template <typename Pool, typename Computer>

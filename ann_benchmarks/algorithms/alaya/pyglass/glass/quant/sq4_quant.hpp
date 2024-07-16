@@ -64,7 +64,7 @@ struct SQ4Quantizer {
   }
 
   template <typename Pool>
-  void reorder(const Pool &pool, const float *q, int *dst, int k) const {
+  void reorder(const Pool &pool, const float *q, int *dst, int k, bool debug = false) const {
     int cap = pool.capacity();
     auto computer = reorderer.get_computer(q);
     searcher::MaxHeap<typename Reorderer::template Computer<0>::dist_type> heap(

@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv) {
   if (argc != 7) {
-//    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
+    //    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
     exit(-1);
   }
 
@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
   timer.reset();
   // #pragma omp parallel for schedule(dynamic)
   for (size_t q = 0; q < query_num; ++q) {
+    printf("%d\n", q);
     auto &ids = tmp_id[q];
     auto cur_query = query_load + q * query_dim;
     searcher->Search(cur_query, ef, ids.data());
@@ -78,8 +79,16 @@ int main(int argc, char **argv) {
     }
   }
   timer.end();
+
+  for (int q = 0; q < 10; ++q) {
+    printf("res\n");
+    for (int i = 0; i < topk; ++i) {
+      printf("%d, ", res_pool[q].data_[i].id);
+    }
+  }
+  printf("\n");
   // std::cout << "Time: " << timer.getElapsedTime() << std::endl;
-//  fmt::println("Search Time: {}", timer.getElapsedTime());
+  //  fmt::println("Search Time: {}", timer.getElapsedTime());
 
   // for (int i = 0; i < 10; ++i) {
   //   printf("search res: \n");
@@ -106,8 +115,9 @@ int main(int argc, char **argv) {
   // }
 
   float recall = glass::CalRecallById(res_pool, topk, answers, kk);
+  printf("Recall: %f\n", recall);
 
-//  fmt::println("Recall: {}", recall);
+  //  fmt::println("Recall: {}", recall);
 
   return 0;
 }

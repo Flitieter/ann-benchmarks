@@ -63,7 +63,7 @@ template <Metric metric, int DIM = 0> struct SQ8Quantizer {
   }
 
   template <typename Pool>
-  void reorder(const Pool &pool, const float * /**q*/, int *dst, int k) const {
+  void reorder(const Pool &pool, const float * /**q*/, int *dst, int k, bool debug = false) const {
     for (int i = 0; i < k; ++i) {
       dst[i] = pool.id(i);
     }
