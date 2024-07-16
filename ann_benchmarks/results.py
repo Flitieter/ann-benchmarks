@@ -90,6 +90,7 @@ def load_all_results(dataset: Optional[str] = None,
                 continue
             try:
                 with h5py.File(os.path.join(root, filename), "r+") as f:
+                    print(f"Reading {filename}")
                     properties = dict(f.attrs)
                     if batch_mode != properties["batch_mode"]:
                         continue

@@ -64,6 +64,8 @@ def get_dataset(dataset_name: str) -> Tuple[h5py.File, int]:
     # here for backward compatibility, to ensure old datasets can still be used with newer versions
     # cast to integer because the json parser (later on) cannot interpret numpy integers
     dimension = int(hdf5_file.attrs["dimension"]) if "dimension" in hdf5_file.attrs else len(hdf5_file["train"][0])
+    print("filename", hdf5_filename)
+    print("dim", dimension)
     return hdf5_file, dimension
 
 
@@ -569,9 +571,41 @@ def dbpedia_entities_openai_1M(out_fn, n = None):
 
     write_output(X_train, X_test, out_fn, "angular")
 
+def cohere(out_fn):
+    from sklearn.model_selection import train_test_split
+    from datasets import load_dataset
+    import numpy as np
+
+    data = load_dataset("Cohere/wikipedia-22-12-simple-embeddings", split="train")
+
+    embeddings = data.to_pandas()['emb'].to_numpy()
+    embeddings = np.vstack(embeddings).reshape((-1, 768))
+
+    X_train, X_test = train_test_split(embeddings, test_size=1000, random_state=42)
+
+    write_output(X_train, X_test, out_fn, "angular")
+
+def cohere_euclidean(out_fn):
+    from sklearn.model_selection import train_test_split
+    from datasets import load_dataset
+    import numpy as np
+
+    data = load_dataset("Cohere/wikipedia-22-12-simple-embeddings", split="train")
+
+    embeddings = data.to_pandas()['emb'].to_numpy()
+    embeddings = np.vstack(embeddings).reshape((-1, 768))
+
+    X_train, X_test = train_test_split(embeddings, test_size=1000, random_state=42)
+
+    write_output(X_train, X_test, out_fn, "euclidean")
+
 
 DATASETS: Dict[str, Callable[[str], None]] = {
-    "cohere-768-euclidean": None,
+    "cohere-768-angular": cohere,
+    "cohere-euclidean" : cohere_euclidean,
+    "cohere-768-euclidean-5k": None,
+    "sift-128-50k-euclidean": None,
+    # "cohere-768-euclidean": None,
     "deep-image-96-angular": deep_image,
     "fashion-mnist-784-euclidean": fashion_mnist,
     "gist-960-euclidean": gist,
