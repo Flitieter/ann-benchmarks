@@ -601,6 +601,7 @@ def cohere_euclidean(out_fn):
 
 
 DATASETS: Dict[str, Callable[[str], None]] = {
+    "dbpedia-entities-openai-1M": None,
     "cohere-768-angular": cohere,
     "cohere-euclidean" : cohere_euclidean,
     "cohere-768-euclidean-5k": None,

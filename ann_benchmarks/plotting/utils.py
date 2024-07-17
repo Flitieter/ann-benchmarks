@@ -18,7 +18,7 @@ def create_pointset(data, xn, yn):
     rev_y = -1 if ym["worst"] < 0 else 1
     rev_x = -1 if xm["worst"] < 0 else 1
     data.sort(key=lambda t: (rev_y * t[-1], rev_x * t[-2]))
-
+    print("Point: ",xn," ",yn)
     axs, ays, als = [], [], []
     # Generate Pareto frontier
     xs, ys, ls = [], [], []

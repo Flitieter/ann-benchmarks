@@ -9,6 +9,7 @@
 #include <glass/neighbor.hpp>
 #include <glass/quant/quant.hpp>
 #include <glass/searcher.hpp>
+#include <glass/mergraph/mergraph.hpp>
 
 class Array1DViewInt64 {
  public:
@@ -41,7 +42,8 @@ class Array2DViewFloat {
 class Alaya {
  private:
   glass::Searcher<glass::SQ8SymmetricQuantizer<glass::Metric::L2>>* searcher{nullptr};
-  glass::HNSW* hnsw{nullptr};
+//  glass::HNSW* hnsw{nullptr};
+  glass::MERGRAPH* mergraph{nullptr};
   Array2DViewFloat data;
 
  public:
@@ -51,15 +53,16 @@ class Alaya {
   const Alaya& operator=(Alaya&&) = delete;
   ~Alaya() {
     delete searcher;
-    delete hnsw;
+//    delete hnsw;
+    delete mergraph;
   }
 
   void fit(void* data, long* shape, long* strides, int M) {
-    hnsw = new glass::HNSW(shape[1], "L2", M);
+      mergraph = new glass::MERGRAPH(shape[1], "L2", M);
     assert(strides[1] == sizeof(float));
     assert(strides[0] == shape[1] * strides[1]);
-    hnsw->Build((float*)data, shape[0]);
-    searcher = new glass::Searcher<glass::SQ8SymmetricQuantizer<glass::Metric::L2>>(hnsw->GetGraph());
+    mergraph->Build((float*)data, shape[0]);
+    searcher = new glass::Searcher<glass::SQ8SymmetricQuantizer<glass::Metric::L2>>(mergraph->GetGraph());
     searcher->SetData((float*)data, shape[0], shape[1]);
     // int num_threads = omp_get_num_threads();
     searcher->Optimize(1);
