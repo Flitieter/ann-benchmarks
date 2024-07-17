@@ -1,6 +1,7 @@
 #include <fmt/chrono.h>
 #include <fmt/core.h>
 
+#include <filesystem>
 #include <glass/graph.hpp>
 #include <glass/hnsw/hnsw.hpp>
 #include <glass/io_utils.hpp>
@@ -42,36 +43,45 @@ float cal_recall(const std::vector<std::vector<int>> &res_id, const int *gt_id, 
 }
 
 int main(int argc, char **argv) {
-  if (argc != 7) {
-    //    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
-    exit(-1);
-  }
+  std::filesystem::path dir_path(argv[1]);
+  int M = atoi(argv[2]);
+  int topk = atoi(argv[3]);
+  int ef = atoi(argv[4]);
+  int rerank_k = atoi(argv[5]);
 
-  char *data_file = argv[1];
-  char *query_file = argv[2];
-  char *ans_file = argv[3];
-
-  int topk = atoi(argv[4]);
-  int ef = atoi(argv[5]);
-  int rerank_k = atoi(argv[6]);
+  std::string dir_name = dir_path.filename().string();
+  std::filesystem::path data_file = dir_path / fmt::format("{}_base.fvecs", dir_name);
+  std::filesystem::path query_file = dir_path / fmt::format("{}_query.fvecs", dir_name);
+  std::filesystem::path gt_file = dir_path / fmt::format("{}_gti.ivecs", dir_name);
 
   float *data_load = NULL;
   unsigned points_num, dim;
-  glass::load_fvecs(data_file, data_load, points_num, dim);
+  glass::load_fvecs(data_file.string().c_str(), data_load, points_num, dim);
 
   float *query_load = NULL;
   unsigned query_num, query_dim;
-  glass::load_fvecs(query_file, query_load, query_num, query_dim);
+  glass::load_fvecs(query_file.string().c_str(), query_load, query_num, query_dim);
   assert(dim == query_dim);
 
   unsigned *answers = NULL;
   unsigned ans_num, gt_col;
-  glass::load_ivecs(ans_file, answers, ans_num, gt_col);
+  glass::load_ivecs(gt_file.string().c_str(), answers, ans_num, gt_col);
   assert(ans_num == query_num);
 
-  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::HNSW(dim, "L2"));
+  std::filesystem::path index_file = dir_path / fmt::format("{}_M{}.hnsw", dir_name, M);
 
-  index->Build(data_load, points_num);
+  glass::Graph<int> *graph = nullptr;
+
+  if (std::filesystem::exists(index_file)) {
+    glass::Graph<int> *load_graph = new glass::Graph<int>();
+    load_graph->load(index_file.string());
+    graph = load_graph;
+  } else {
+    auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::HNSW(dim, "L2", M));
+    index->Build(data_load, points_num);
+    graph = new glass::Graph<int>(index->GetGraph());
+    graph->save(index_file.string());
+  }
 
   // index->GetGraph().save("sift.hsnw");
 
@@ -79,7 +89,7 @@ int main(int argc, char **argv) {
 
   const std::string metric = "L2";
   int level = 3;
-  auto searcher = std::unique_ptr<glass::SearcherBase>(glass::create_searcher(index->GetGraph(), metric, level));
+  auto searcher = std::unique_ptr<glass::SearcherBase>(glass::create_searcher(*graph, metric, level));
   searcher->SetEf(ef);
 
   searcher->SetData(data_load, points_num, dim);
@@ -125,40 +135,40 @@ int main(int argc, char **argv) {
   float recall = glass::CalRecallById(res_pool, topk, answers, gt_col);
   printf("Recall: %f\n", recall);
 
-  //  fmt::println("Recall: {}", recall);
-  // for (int q = 0; q < 10; ++q) {
-  //   printf("res\n");
-  //   for (int i = 0; i < topk; ++i) {
-  //     printf("%d, ", res_pool[q].data_[i].id);
-  //   }
-  // }
-  // printf("\n");
-  // std::cout << "Time: " << timer.getElapsedTime() << std::endl;
-  //  fmt::println("Search Time: {}", timer.getElapsedTime());
-
-  // for (int i = 0; i < 10; ++i) {
-  //   printf("search res: \n");
-  //   for (int j = 0; j < topk; ++j) {
-  //     printf("%d, ", tmp_id[i][j]);
-  //   }
-  //   printf("\n");
-  //   std::set<int> S = {};
-  //   for (int j = 0; j < topk; ++j) {
-  //     printf("%d, ", answers[i * kk + j]);
-  //     S.insert(answers[i * kk + j]);
-  //   }
-  //   printf("\n");
-
-  //   int hit_cou = 0;
-  //   for (int j = 0; j < topk; ++j) {
-  //     if (S.find(tmp_id[i][j]) != S.end()) hit_cou++;
-  //   }
-  //   printf("hit count: %d\n", hit_cou);
-  //   //    for (int j=0; j<topk; ++j) {
-  //   //        printf("%d, ", bru_id[i][j]);
-  //   //    }
-  //   //    printf("\n");
-  // }
-
   return 0;
 }
+
+//  fmt::println("Recall: {}", recall);
+// for (int q = 0; q < 10; ++q) {
+//   printf("res\n");
+//   for (int i = 0; i < topk; ++i) {
+//     printf("%d, ", res_pool[q].data_[i].id);
+//   }
+// }
+// printf("\n");
+// std::cout << "Time: " << timer.getElapsedTime() << std::endl;
+//  fmt::println("Search Time: {}", timer.getElapsedTime());
+
+// for (int i = 0; i < 10; ++i) {
+//   printf("search res: \n");
+//   for (int j = 0; j < topk; ++j) {
+//     printf("%d, ", tmp_id[i][j]);
+//   }
+//   printf("\n");
+//   std::set<int> S = {};
+//   for (int j = 0; j < topk; ++j) {
+//     printf("%d, ", answers[i * kk + j]);
+//     S.insert(answers[i * kk + j]);
+//   }
+//   printf("\n");
+
+//   int hit_cou = 0;
+//   for (int j = 0; j < topk; ++j) {
+//     if (S.find(tmp_id[i][j]) != S.end()) hit_cou++;
+//   }
+//   printf("hit count: %d\n", hit_cou);
+//   //    for (int j=0; j<topk; ++j) {
+//   //        printf("%d, ", bru_id[i][j]);
+//   //    }
+//   //    printf("\n");
+// }
