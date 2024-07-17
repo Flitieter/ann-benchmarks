@@ -1,3 +1,5 @@
+#include <fmt/chrono.h>
+#include <fmt/core.h>
 
 #include <glass/graph.hpp>
 #include <glass/hnsw/hnsw.hpp>
@@ -8,6 +10,36 @@
 #include <glass/timer.hpp>
 #include <set>
 #include <string>
+
+void rerank(std::vector<int> &tmp_id, const float *query, const float *data, glass::searcher::LPool<float> &res_pool,
+            int k, int rerank, int dim) {
+  for (size_t i = 0; i < k; ++i) {
+    res_pool.insert_back(tmp_id[i], glass::L2SqrRef(query, data + tmp_id[i] * dim, dim));
+  }
+  res_pool.sorted();
+  for (size_t i = k; i < rerank; ++i) {
+    res_pool.emplace_insert(tmp_id[i], glass::L2SqrRef(query, data + tmp_id[i] * dim, dim));
+  }
+}
+
+float cal_recall(const std::vector<std::vector<int>> &res_id, const int *gt_id, int gt_line, int query_num,
+                 int data_num, int dim, int topk) {
+  float exact_num = 0;
+  for (auto q = 0; q < query_num; ++q) {
+    auto res_id = gt_id + q * topk;
+    std::vector<bool> visted(topk, false);
+    for (uint32_t i = 0; i < topk; ++i) {
+      for (uint32_t j = 0; j < topk; ++j) {
+        if (!visted[j] && res_id[i] == gt_id[q * gt_line + j]) {
+          exact_num++;
+          visted[j] = true;
+          break;
+        }
+      }
+    }
+  }
+  return exact_num / (query_num * topk);
+}
 
 int main(int argc, char **argv) {
   if (argc != 7) {
@@ -33,8 +65,8 @@ int main(int argc, char **argv) {
   assert(dim == query_dim);
 
   unsigned *answers = NULL;
-  unsigned ans_num, kk;
-  glass::load_ivecs(ans_file, answers, ans_num, kk);
+  unsigned ans_num, gt_col;
+  glass::load_ivecs(ans_file, answers, ans_num, gt_col);
   assert(ans_num == query_num);
 
   auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::HNSW(dim, "L2"));
@@ -52,41 +84,55 @@ int main(int argc, char **argv) {
 
   searcher->SetData(data_load, points_num, dim);
 
-  searcher->Optimize(96);
+  searcher->Optimize(1);
 
   std::cout << "create searcher" << std::endl;
 
   // std::vector<maxPQIFCS<float>> candidate_pool(query_num, maxPQIFCS<float>(topk));
-  std::vector<std::vector<int>> tmp_id(query_num, std::vector<int>(ef));
-  std::vector<glass::searcher::LPool<float>> res_pool(query_num, glass::searcher::LPool<float>(rerank_k));
+  // std::vector<std::vector<int>> tmp_id(query_num, std::vector<int>(ef));
+  std::vector<glass::searcher::LPool<float>> res_pool(query_num, glass::searcher::LPool<float>(topk));
+
+  // std::vector<std::vector<unsigned>> res_id(query_num, std::vector<int>(topk));
 
   Timer<std::chrono::milliseconds> timer;
 
   timer.reset();
   // #pragma omp parallel for schedule(dynamic)
   for (size_t q = 0; q < query_num; ++q) {
-    printf("%d\n", q);
-    auto &ids = tmp_id[q];
+    // printf("%d\n", q);
+    // auto &ids = tmp_id[q];
+    std::vector<int> ids(ef);
+    // glass::searcher::LPool<float> res_pool(rerank_k);
     auto cur_query = query_load + q * query_dim;
     searcher->Search(cur_query, ef, ids.data());
 
-    for (size_t i = 0; i < rerank_k; ++i) {
-      res_pool[q].insert_back(ids[i], glass::L2SqrRef(cur_query, data_load + ids[i] * dim, dim));
-    }
-    res_pool[q].sorted();
-    for (size_t i = rerank_k; i < ef; ++i) {
-      res_pool[q].emplace_insert(ids[i], glass::L2SqrRef(cur_query, data_load + ids[i] * dim, dim));
-    }
+    rerank(ids, cur_query, data_load, res_pool[q], topk, rerank_k, dim);
+
+    // for (size_t k = 0; k < topk; ++k) {
+    //   res_id[q][k] = res_pool.data_[i].id;
+    // }
   }
   timer.end();
 
-  for (int q = 0; q < 10; ++q) {
-    printf("res\n");
-    for (int i = 0; i < topk; ++i) {
-      printf("%d, ", res_pool[q].data_[i].id);
-    }
-  }
-  printf("\n");
+  fmt::println("topk:{}, ef:{}, rerank_k:{}", topk, ef, rerank_k);
+  float sec = timer.getElapsedTime().count() / 1000.0;
+
+  fmt::println("Query Num: {}, Data Num: {}", query_num, points_num);
+  fmt::println("Search Time: {}, in sec: {}", timer.getElapsedTime(), sec);
+  fmt::println("QPS: {}", query_num / sec);
+  // fmt::println("Recall: {}", cal_recall(res_id, answers, gt_col, query_num, points_num, dim, topk));
+
+  float recall = glass::CalRecallById(res_pool, topk, answers, gt_col);
+  printf("Recall: %f\n", recall);
+
+  //  fmt::println("Recall: {}", recall);
+  // for (int q = 0; q < 10; ++q) {
+  //   printf("res\n");
+  //   for (int i = 0; i < topk; ++i) {
+  //     printf("%d, ", res_pool[q].data_[i].id);
+  //   }
+  // }
+  // printf("\n");
   // std::cout << "Time: " << timer.getElapsedTime() << std::endl;
   //  fmt::println("Search Time: {}", timer.getElapsedTime());
 
@@ -113,11 +159,6 @@ int main(int argc, char **argv) {
   //   //    }
   //   //    printf("\n");
   // }
-
-  float recall = glass::CalRecallById(res_pool, topk, answers, kk);
-  printf("Recall: %f\n", recall);
-
-  //  fmt::println("Recall: {}", recall);
 
   return 0;
 }
