@@ -52,6 +52,8 @@ target_link_libraries(AlayaDB glass)
 pybind11_add_module(alaya pybinding.cpp)
 target_link_libraries(alaya PRIVATE glass OpenMP::OpenMP_CXX)
 
+add_executable(main main/main.cpp)
+target_link_libraries(main glass OpenMP::OpenMP_CXX)
 
 
 # if (CMAKE_BUILD_TYPE STREQUAL "Debug")

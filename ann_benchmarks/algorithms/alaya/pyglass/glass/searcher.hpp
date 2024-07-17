@@ -129,8 +129,8 @@ struct Searcher : public SearcherBase {
   void Search(const float *q, int k, int *dst, bool debug = false) const override {
     auto computer = quant.get_computer(q);
     if (!debug) {
-      assert(k == 10);
-      assert(ef == 32);
+//      assert(k == 10);
+//      assert(ef == 32);
     }
     searcher::LinearPool<typename Quantizer::template Computer<0>::dist_type> pool(nb, ef, k);
     graph.initialize_search(pool, computer);

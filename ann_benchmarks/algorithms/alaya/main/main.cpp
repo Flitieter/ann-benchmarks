@@ -1,6 +1,8 @@
 
 #include <glass/graph.hpp>
-#include <glass/hnsw/hnsw.hpp>
+#include <cassert>
+#include <glass/mergraph/mergraph.hpp>
+#include <glass/nsg/nsg.hpp>
 #include <glass/io_utils.hpp>
 #include <glass/neighbor.hpp>
 #include <glass/rerank.hpp>
@@ -37,7 +39,7 @@ int main(int argc, char **argv) {
   glass::load_ivecs(ans_file, answers, ans_num, kk);
   assert(ans_num == query_num);
 
-  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::HNSW(dim, "L2"));
+  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::MERGRAPH(dim, "L2"));
 
   index->Build(data_load, points_num);
 

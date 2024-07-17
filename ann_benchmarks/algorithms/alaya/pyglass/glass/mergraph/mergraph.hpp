@@ -29,11 +29,29 @@ namespace glass{
                 for(int j=0;j<M;j++)Union.insert(hnsw->final_graph.at(i,j));
                 for(int j=0;j<M;j++)Union.insert(nsg->final_graph.at(i,j));
                 int cnt=0;
+
                 for(auto x:Union){
+                    if(x==-1)continue;
                     final_graph.at(i,cnt)=x;
                     cnt++;
                 }
+                if(i<10){
+                    std::cout<<"id: "<<i<<"deg: "<<Union.size()<<"\n";
+                    for(int j=0;j<2*M;j++)std::cout<<final_graph.at(i,j)<<" ";
+                    std::cout<<"\n";
+                }
             }
+            int hnsw_ep=hnsw->final_graph.initializer->ep;
+            bool hnsw_ep_exist=false;
+            for(auto x:nsg->final_graph.eps)if(x==hnsw_ep)hnsw_ep_exist=true;
+            final_graph.eps=nsg->final_graph.eps;
+            if(!hnsw_ep_exist)final_graph.eps.push_back(hnsw_ep);
+
+            std::cout<<"eps: \n";
+            for(auto ep:final_graph.eps){
+                std::cout<<ep<<" ";
+            }
+            std::cout<<"\n";
         }
 
 
