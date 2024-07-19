@@ -14,7 +14,7 @@ endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_options(-g -O0)
 else()
-  add_compile_options(-O3)
+  add_compile_options(-Ofast -g)
 endif()
 
 
@@ -40,7 +40,7 @@ find_package(OpenMP REQUIRED)
 # add_subdirectory(pybind11)
 # find_package(pybind11 CONFIG REQUIRED)
 
-add_compile_options(-march=native)
+add_compile_options(-march=native -O3 -g)
 
 add_subdirectory(pyglass)
 

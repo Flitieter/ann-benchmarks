@@ -10,7 +10,7 @@
 
 namespace glass {
 
-inline void load_fvecs(char *filename, float *&data, unsigned &num,
+inline void load_fvecs(const char *filename, float *&data, unsigned &num,
                        unsigned &dim) {  // load data with sift10K pattern
   std::ifstream in(filename, std::ios::binary);
   if (!in.is_open()) {
@@ -35,7 +35,7 @@ inline void load_fvecs(char *filename, float *&data, unsigned &num,
   in.close();
 }
 
-inline void load_ivecs(char *filename, unsigned *&data, unsigned &num,
+inline void load_ivecs(const char *filename, unsigned *&data, unsigned &num,
                        unsigned &dim) {  // load data with sift10K pattern
   std::ifstream in(filename, std::ios::binary);
   if (!in.is_open()) {
