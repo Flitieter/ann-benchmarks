@@ -53,9 +53,12 @@ float:
       run_groups:
         HNSW:
           args:
-            M: [4, 8, 12, 16, 24, 36, 48, 64, 96]
-            efConstruction: [200, 500]
-          query_args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+            # M: [12, 16, 24, 36, 48, 64, 96]
+            M: [36]
+            # efConstruction: [200, 500]
+            # M: [4, ]
+            efConstruction: [200,]
+          query_args: [[10, 20, 40, 80, 120, 200,]]
     - base_args: ["@metric", "@dimension"]
       constructor: MilvusSCANN
       disabled: false
@@ -65,5 +68,6 @@ float:
       run_groups:
         SCANN:
           args:
-            nlist: [64, 128, 256, 512, 1024, 2048, 4096, 8192]
+            nlist: [64, 128, 256, 512, 1024, 2048]
+            # nlist: [1024,]
           query_args: [[1, 10, 20, 30, 50]]

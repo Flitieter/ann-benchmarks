@@ -24,7 +24,7 @@ struct HNSW : public Builder {
 
   Graph<int> final_graph;
 
-  HNSW(int dim, const std::string &metric, int R = 32, int L = 200) : dim(dim), M(R / 2), efConstruction(L) {
+  HNSW(int dim, const std::string &metric, int R = 32, int L = 500) : dim(dim), M(R / 2), efConstruction(L) {
     auto m = metric_map[metric];
     if (m == Metric::L2) {
       space = std::make_unique<hnswlib::L2Space>(dim);

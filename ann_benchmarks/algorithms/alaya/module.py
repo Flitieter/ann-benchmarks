@@ -14,6 +14,10 @@ c_del_alaya = c_module.del_alaya
 c_del_alaya.argtypes = [ctypes.c_void_p]
 c_del_alaya.restype = None
 
+c_set_ef = c_module.set_ef
+c_set_ef.argtypes = [c_void_p, c_int]
+c_set_ef.restype = None
+
 c_fit = c_module.fit
 c_fit.argtypes = [c_void_p, c_void_p, POINTER(c_long), POINTER(c_long), c_int]
 c_fit.restype = None
@@ -29,8 +33,6 @@ class Alaya(BaseANN):
         self._M = M
         self.name = "Alaya(metric={}, M={})".format(metric, M)
         # self.data = None
-        self.ef = 32
-        self.rerank = 20
         self.dim = None
         self._data = None
         self.c_alaya = c_init_alaya()
@@ -66,6 +68,7 @@ class Alaya(BaseANN):
 
     def set_query_arguments(self, ef):
         self.ef, self.rerank = ef
+        c_set_ef(self.c_alaya, self.ef)
 
     # def batch_query(self, X: np.array, n: int) -> None:
     #     rows, cols = X.shape

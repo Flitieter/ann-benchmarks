@@ -57,6 +57,8 @@ class Alaya {
     delete mergraph;
   }
 
+  void set_ef(int ef) { searcher->SetEf(ef); }
+
   void fit(void* data, long* shape, long* strides, int M) {
       mergraph = new glass::MERGRAPH(shape[1], "L2", M);
     assert(strides[1] == sizeof(float));
@@ -65,6 +67,7 @@ class Alaya {
     searcher = new glass::Searcher<glass::SQ8SymmetricQuantizer<glass::Metric::L2>>(mergraph->GetGraph());
     searcher->SetData((float*)data, shape[0], shape[1]);
     // int num_threads = omp_get_num_threads();
+    // searcher->SetEf(ef);
     searcher->Optimize(1);
     this->data.init(data, shape, strides);
   }
@@ -75,8 +78,8 @@ class Alaya {
     assert(query_stirdes[1] == sizeof(float));
     assert(query_stirdes[0] == query_shape[1] * query_stirdes[1]);
     int tmp_id[ef];
+    // searcher->SetEf(ef);
     glass::searcher::LPool<float> res_pool(k);
-    searcher->SetEf(ef);
     searcher->Search((float*)query_data, k, tmp_id);
     for (size_t i = 0; i < k; ++i) {
       res_pool.insert_back(tmp_id[i], glass::L2SqrRef((float*)query_data, &this->data(tmp_id[i], 0), query_shape[1]));
@@ -99,9 +102,12 @@ void* init_alaya() { return new Alaya(); }
 
 void del_alaya(void* self) { delete (Alaya*)self; }
 
+void set_ef(void* self, int ef) { ((Alaya*)self)->set_ef(ef); }
+
 void fit(void* self, void* data, long* shape, long* strides, int M) { ((Alaya*)self)->fit(data, shape, strides, M); }
 
-void query(void* self, void* query_data, long* query_shape, long* query_stirdes, int k, int ef, int rerank_k, void* res) {
+void query(void* self, void* query_data, long* query_shape, long* query_stirdes, int k, int ef, int rerank_k,
+           void* res) {
   ((Alaya*)self)->query(query_data, query_shape, query_stirdes, k, ef, rerank_k, res);
 }
 
