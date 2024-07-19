@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   int topk = atoi(argv[4]);
   int ef = atoi(argv[5]);
   int rerank_k = atoi(argv[6]);
-
+    std::cout<<"topK: "<<topk<<"ef:  "<<ef<<"rerank: "<<rerank_k<<"\n";
   float *data_load = NULL;
   unsigned points_num, dim;
   glass::load_fvecs(data_file, data_load, points_num, dim);
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   glass::load_ivecs(ans_file, answers, ans_num, kk);
   assert(ans_num == query_num);
 
-  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::MERGRAPH(dim, "L2"));
+  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::NSG(dim, "L2"));
 
   index->Build(data_load, points_num);
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   timer.reset();
   // #pragma omp parallel for schedule(dynamic)
   for (size_t q = 0; q < query_num; ++q) {
-    printf("%d\n", q);
+//    printf("%d\n", q);
     auto &ids = tmp_id[q];
     auto cur_query = query_load + q * query_dim;
     searcher->Search(cur_query, ef, ids.data());
@@ -82,14 +82,14 @@ int main(int argc, char **argv) {
   }
   timer.end();
 
-  for (int q = 0; q < 10; ++q) {
-    printf("res\n");
-    for (int i = 0; i < topk; ++i) {
-      printf("%d, ", res_pool[q].data_[i].id);
-    }
-  }
-  printf("\n");
-  // std::cout << "Time: " << timer.getElapsedTime() << std::endl;
+//  for (int q = 0; q < 10; ++q) {
+//    printf("res\n");
+//    for (int i = 0; i < topk; ++i) {
+//      printf("%d, ", res_pool[q].data_[i].id);
+//    }
+//  }
+//  printf("\n");
+   std::cout << "Time: " << timer.getElapsedTime() << std::endl;
   //  fmt::println("Search Time: {}", timer.getElapsedTime());
 
   // for (int i = 0; i < 10; ++i) {
