@@ -602,10 +602,11 @@ def cohere_euclidean(out_fn):
 
 DATASETS: Dict[str, Callable[[str], None]] = {
     "cohere-768-angular": cohere,
-    "cohere-euclidean" : cohere_euclidean,
+    "dbpedia-openai-1000k-euclidean": None,
+    # "cohere-euclidean" : cohere_euclidean,
     "cohere-768-euclidean-5k": None,
     "sift-128-50k-euclidean": None,
-    # "cohere-768-euclidean": None,
+    "cohere-768-euclidean": None,
     "deep-image-96-angular": deep_image,
     "fashion-mnist-784-euclidean": fashion_mnist,
     "gist-960-euclidean": gist,
