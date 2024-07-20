@@ -33,6 +33,7 @@ struct Searcher : public SearcherBase {
   int nb;
   Graph<int> graph;
   Quantizer quant;
+  // size_t search_count = 0;
 
   // Search parameters
   int ef = 32;
@@ -135,11 +136,11 @@ struct Searcher : public SearcherBase {
     searcher::LinearPool<typename Quantizer::template Computer<0>::dist_type> pool(nb, ef, k);
     graph.initialize_search(pool, computer);
     SearchImpl(pool, computer);
-    if (debug) {
-      for (int i = 0; i < ef; ++i) {
-        printf("pool[%d] %d\n", i, pool.id(i));
-      }
-    }
+    // if (debug) {
+    //   for (int i = 0; i < ef; ++i) {
+    //     printf("pool[%d] %d\n", i, pool.id(i));
+    //   }
+    // }
     quant.reorder(pool, q, dst, ef, debug);
   }
 
@@ -213,6 +214,7 @@ inline std::unique_ptr<SearcherBase> create_searcher(const Graph<int> &graph, co
     }
   } else if (level == 1) {
     if (m == Metric::L2) {
+      std::cout << "Create SQ8 Searcher" << std::endl;
       return std::make_unique<Searcher<SQ8Quantizer<Metric::L2>>>(graph);
     } else if (m == Metric::IP) {
       return std::make_unique<Searcher<SQ8Quantizer<Metric::IP>>>(graph);
@@ -222,6 +224,7 @@ inline std::unique_ptr<SearcherBase> create_searcher(const Graph<int> &graph, co
     }
   } else if (level == 2) {
     if (m == Metric::L2) {
+      std::cout << "Create SQ4 Searcher" << std::endl;
       return std::make_unique<Searcher<SQ4Quantizer<Metric::L2>>>(graph);
     } else if (m == Metric::IP) {
       return std::make_unique<Searcher<SQ4Quantizer<Metric::IP>>>(graph);

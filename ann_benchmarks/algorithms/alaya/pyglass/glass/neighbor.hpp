@@ -343,6 +343,12 @@ struct LPool {
     return get_id(data_[pre].id);
   }
 
+  void clear() const {
+    size_ = 0;
+    cur_ = 0;
+    capacity_ = 0;
+  }
+
   bool has_next() const { return cur_ < size_; }
   int id(int i) const { return get_id(data_[i].id); }
   int dist(int i) const { return data_[i].distance; }
@@ -373,7 +379,7 @@ struct HeapPool {
   int nb, size_ = 0, capacity_;
   MinMaxHeap<dist_t> candidates;
   MaxHeap<dist_t> retset;
-  // std::priority_queue<std::pair<dist_t, int>> heap;
+  std::priority_queue<std::pair<dist_t, int>> heap;
   Bitset<uint64_t> vis;
   Bitset<uint64_t> vis1;
 };
