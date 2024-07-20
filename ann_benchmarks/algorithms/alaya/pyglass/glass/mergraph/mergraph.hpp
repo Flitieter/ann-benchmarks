@@ -16,7 +16,8 @@ namespace glass{
         Graph<int> final_graph;
         glass::HNSW* hnsw{nullptr};
         glass::NSG* nsg{nullptr};
-        MERGRAPH(int dim, const std::string &metric, int R = 32, int L = 200): dim(dim), M(R), efConstruction(L){
+        bool Cut;
+        MERGRAPH(int dim, const std::string &metric, bool cut,int R = 32, int L = 200): dim(dim), M(R), efConstruction(L),Cut(cut){
             hnsw = new glass::HNSW(dim, metric, M, efConstruction);
             nsg  = new glass::NSG(dim, metric, M, efConstruction);
         }
@@ -73,7 +74,6 @@ namespace glass{
             final_graph.init(nb, 2 * M);
             std::vector<std::set<int> > Union(nb);
             std::vector<std::priority_queue<std::pair<float,int>,std::vector<std::pair<float,int>>, std::greater<>> > PL(nb);
-            bool Cut=true;
             if(Cut)std::cout<<"!!!Execute getNeighborsByHeuristic!!!\n";
             #pragma omp parallel for schedule(dynamic)
             for(int i=0;i<nb;i++){
