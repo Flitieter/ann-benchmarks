@@ -12,11 +12,11 @@
 #include <string>
 
 int main(int argc, char **argv) {
-  if (argc != 7) {
+  if (argc != 8) {
     //    fmt::println("{}  data_file query_file answer_file result_path", argv[0]);
     exit(-1);
   }
-
+  std::set<std::string> valid_graph={"HNSW","NSG","MERGE","MERGE_CUT"};
   char *data_file = argv[1];
   char *query_file = argv[2];
   char *ans_file = argv[3];
@@ -24,7 +24,8 @@ int main(int argc, char **argv) {
   int topk = atoi(argv[4]);
   int ef = atoi(argv[5]);
   int rerank_k = atoi(argv[6]);
-    std::cout<<"topK: "<<topk<<"ef:  "<<ef<<"rerank: "<<rerank_k<<"\n";
+  std::string graph_type(argv[7]);
+    std::cout<<"topK: "<<topk<<",ef:  "<<ef<<",rerank: "<<rerank_k<<",graph_type: "<<graph_type<<"\n";
   float *data_load = NULL;
   unsigned points_num, dim;
   glass::load_fvecs(data_file, data_load, points_num, dim);
@@ -38,8 +39,11 @@ int main(int argc, char **argv) {
   unsigned ans_num, kk;
   glass::load_ivecs(ans_file, answers, ans_num, kk);
   assert(ans_num == query_num);
-
-  auto index = std::unique_ptr<glass::Builder>((glass::Builder *)new glass::NSG(dim, "L2"));
+  assert(valid_graph.find(graph_type)!=valid_graph.end());
+  auto index =(graph_type=="HNSW")? std::unique_ptr<glass::Builder>((glass::Builder *)new glass::HNSW(dim, "L2"))
+          :(graph_type=="NSG")? std::unique_ptr<glass::Builder>((glass::Builder *)new glass::NSG(dim, "L2"))
+          :(graph_type=="MERGE")? std::unique_ptr<glass::Builder>((glass::Builder *)new glass::MERGRAPH(dim, "L2",false))
+          :std::unique_ptr<glass::Builder>((glass::Builder *)new glass::MERGRAPH(dim, "L2",true));
 
   index->Build(data_load, points_num);
 
